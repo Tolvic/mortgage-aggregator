@@ -1,36 +1,33 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using mortageAggregator.API.Calculator;
-using mortageAggregator.API.Repositories;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace mortageAggregator.API
+namespace mortgageAggregator.UI
 {
     public class Startup
     {
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            ApiEndPoints = Configuration.GetSection("ApiEndPoints").GetChildren()
+                  .ToDictionary(x => x.Key, x => x.Value); ;
         }
 
         public IConfiguration Configuration { get; }
+        public Dictionary<string, string> ApiEndPoints { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllersWithViews();
 
-            services.AddDbContext<MortageAggregatorContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("MortgageAggregatorContext"))
-            );
+            services.AddHttpClient("User", c => { c.BaseAddress = new System.Uri(ApiEndPoints["User"]); });
+            services.AddHttpClient("AvailableMortgages", c => { c.BaseAddress = new System.Uri(ApiEndPoints["AvailableMortgages"]); });
 
-            services.AddTransient<ILoanToValueCalculator, LoanToValueCalculator>();
-            services.AddTransient<IUsersRepository, UsersRepository>();
-            services.AddTransient<IMortgageRepository, MortageRepository>();
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,8 +37,14 @@ namespace mortageAggregator.API
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
 
@@ -49,7 +52,9 @@ namespace mortageAggregator.API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

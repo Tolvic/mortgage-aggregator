@@ -1,0 +1,39 @@
+﻿@model IEnumerable<mortageAggregator.UI.Models.Mortgage>
+
+<table class="table" id="mortgage-table">
+    <thead>
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Lender)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.interestRate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaxLoanToValue)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Lender)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.interestRate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MaxLoanToValue)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
